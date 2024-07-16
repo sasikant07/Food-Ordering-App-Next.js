@@ -7,14 +7,15 @@ import { redirect } from "next/navigation";
 export default function () {
   const session = useSession();
   const [userName, setUserName] = useState("");
+  const [image, setImage] = useState("");
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { status } = session;
-  const userImage = session.data?.user?.image;
 
   useEffect(() => {
     if (status === "authenticated") {
       setUserName(session.data?.user?.name);
+      setImage(session.data.user.image);
     }
   }, [session, status]);
 
@@ -43,6 +44,22 @@ export default function () {
     }
   };
 
+  const handleFileChange = async (e) => {
+    const files = e.target.files;
+
+    if (files?.length === 1) {
+      const data = new FormData();
+      data.set("file", files[0]);
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+        // headers: { "Content-Type": "multipart/form-data" },
+      });
+      const link = await response.json();
+      setImage(link);
+    }
+  };
+
   return (
     <section className="mt-8">
       <h1 className="text-center text-primary text-4xl mb-4">Profile</h1>
@@ -59,15 +76,26 @@ export default function () {
         )}
         <div className="flex gap-4 items-center">
           <div className="">
-            <div className="p-2 rounded-lg">
-              <Image
-                className="rounded-lg w-full h-full mb-1"
-                src={userImage}
-                width={256}
-                height={256}
-                alt="avatar"
-              />
-              <button type="button">Edit</button>
+            <div className="p-2 rounded-lg relative max-w-[120px]">
+              {image && (
+                <Image
+                  className="rounded-lg mb-1"
+                  src={image}
+                  width={120}
+                  height={120}
+                  alt="avatar"
+                />
+              )}
+              <label>
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <span className="block border border-gray-300 rounded-lg p-2 text-center cursor-pointer">
+                  Edit
+                </span>
+              </label>
             </div>
           </div>
           <form className="grow" onSubmit={handleProfileInfoUpdate}>
