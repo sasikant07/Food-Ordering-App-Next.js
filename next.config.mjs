@@ -1,14 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    domains: ['food-ordering-next.js.s3.amazonaws.com', 'res.cloudinary.com'],
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*.googleusercontent.com"
+        hostname: "*.googleusercontent.com",
       },
       {
         protocol: "https",
-        hostname: "*.s3.amazon.com"
+        hostname: "food-ordering-next.js.s3.amazon.com",
       },
     ],
   },

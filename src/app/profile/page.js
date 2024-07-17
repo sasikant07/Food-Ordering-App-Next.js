@@ -53,10 +53,13 @@ export default function () {
       const response = await fetch("/api/upload", {
         method: "POST",
         body: data,
-        // headers: { "Content-Type": "multipart/form-data" },
       });
       const link = await response.json();
+
       setImage(link);
+
+      // For cloudinary upload
+      // setImage(link.imgUrl);
     }
   };
 
@@ -78,11 +81,19 @@ export default function () {
           <div className="">
             <div className="p-2 rounded-lg relative max-w-[120px]">
               {image && (
-                <Image
-                  className="rounded-lg mb-1"
+                // <Image
+                //   className="rounded-lg mb-1"
+                //   src={image}
+                //   width={256}
+                //   height={256}
+                //   alt="avatar"
+                // />
+                /* For s3 Image */
+                <img
+                  className="rounded-lg w-full h-full mb-1"
                   src={image}
-                  width={120}
-                  height={120}
+                  width={256}
+                  height={256}
                   alt="avatar"
                 />
               )}
