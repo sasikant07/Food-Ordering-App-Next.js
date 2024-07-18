@@ -3,19 +3,35 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import toast from "react-hot-toast";
+import UserTabs from "@/components/layout/UserTabs";
 
 export default function () {
   const session = useSession();
   const [userName, setUserName] = useState("");
   const [image, setImage] = useState("");
-  const [saved, setSaved] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const { status } = session;
 
   useEffect(() => {
     if (status === "authenticated") {
       setUserName(session.data?.user?.name);
       setImage(session.data.user.image);
+      fetch("/api/profile").then((response) => {
+        response.json().then((data) => {
+          setPhone(data.phone);
+          setStreetAddress(data.streetAddress);
+          setPostalCode(data.postalCode);
+          setCity(data.city);
+          setCountry(data.country);
+          setIsAdmin(data.admin);
+        });
+      });
     }
   }, [session, status]);
 
@@ -29,73 +45,90 @@ export default function () {
 
   const handleProfileInfoUpdate = async (e) => {
     e.preventDefault();
-    setSaved(false);
-    setIsSaving(true);
-    const response = await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "Application/json" },
-      body: JSON.stringify({ name: userName }),
+    const savingPromise = new Promise(async (resolve, reject) => {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "Application/json" },
+        body: JSON.stringify({
+          name: userName,
+          image,
+          phone,
+          streetAddress,
+          city,
+          postalCode,
+          country,
+        }),
+      });
+      if (response.ok) {
+        resolve();
+      } else {
+        reject();
+      }
     });
 
-    setIsSaving(false);
-
-    if (response.ok) {
-      setSaved(true);
-    }
+    await toast.promise(savingPromise, {
+      loading: "Saving...",
+      success: "Profile saved!",
+      error: "Profile saving failed!",
+    });
   };
 
   const handleFileChange = async (e) => {
     const files = e.target.files;
-
     if (files?.length === 1) {
       const data = new FormData();
       data.set("file", files[0]);
-      const response = await fetch("/api/upload", {
+
+      const uploadPromise = fetch("/api/upload", {
         method: "POST",
         body: data,
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json().then((link) => {
+              /* For S3 image Upload */
+              // setImage(link);
+
+              /* For cloudinary upload */
+              setImage(link.imgUrl);
+            });
+          }
+        })
+        .catch((error) => {
+          throw new Error(error);
+        });
+
+      await toast.promise(uploadPromise, {
+        loading: "Uploading...",
+        success: "Upload complete!",
+        error: "Upload failed!",
       });
-      const link = await response.json();
-
-      setImage(link);
-
-      // For cloudinary upload
-      // setImage(link.imgUrl);
     }
   };
 
   return (
     <section className="mt-8">
-      <h1 className="text-center text-primary text-4xl mb-4">Profile</h1>
-      <div className="max-w-md mx-auto">
-        {saved && (
-          <h2 className="text-center bg-green-100 p-4 rounded-lg border border-green-300">
-            Profile saved!
-          </h2>
-        )}
-        {isSaving && (
-          <h2 className="text-center bg-blue-100 p-4 rounded-lg border border-blue-300">
-            Saving...
-          </h2>
-        )}
-        <div className="flex gap-4 items-center">
+      <UserTabs isAdmin={isAdmin} />
+      <div className="max-w-md mx-auto mt-8">
+        <div className="flex gap-4">
           <div className="">
             <div className="p-2 rounded-lg relative max-w-[120px]">
               {image && (
-                // <Image
-                //   className="rounded-lg mb-1"
+                <Image
+                  className="rounded-lg w-full h-[86px] mb-1"
+                  src={image}
+                  width={256}
+                  height={266}
+                  alt="avatar"
+                />
+                /* For s3 Image */
+                // <img
+                //   className="rounded-lg w-full h-full mb-1"
                 //   src={image}
                 //   width={256}
                 //   height={256}
                 //   alt="avatar"
                 // />
-                /* For s3 Image */
-                <img
-                  className="rounded-lg w-full h-full mb-1"
-                  src={image}
-                  width={256}
-                  height={256}
-                  alt="avatar"
-                />
               )}
               <label>
                 <input
@@ -110,16 +143,60 @@ export default function () {
             </div>
           </div>
           <form className="grow" onSubmit={handleProfileInfoUpdate}>
+            <label>First and ast name</label>
             <input
               type="text"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               placeholder="First & Last Name"
             />
+            <label>Email</label>
             <input
               type="email"
               disabled={true}
               value={session.data?.user?.email}
+              placeholder="email"
+            />
+            <label>Phone</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Phone number"
+            />
+            <label>Street address</label>
+            <input
+              type="text"
+              value={streetAddress}
+              onChange={(e) => setStreetAddress(e.target.value)}
+              placeholder="Street address"
+            />
+            <div className="flex gap-2">
+              <div className="">
+                <label>Postal code</label>
+                <input
+                  type="text"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  placeholder="Postal code"
+                />
+              </div>
+              <div className="">
+                <label>City</label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="City"
+                />
+              </div>
+            </div>
+            <label>Country</label>
+            <input
+              type="text"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              placeholder="Country"
             />
             <button type="submit">Save</button>
           </form>
