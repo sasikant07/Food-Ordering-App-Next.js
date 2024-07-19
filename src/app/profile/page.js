@@ -16,6 +16,7 @@ export default function () {
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [profileFetched, setProfileFetched] = useState(false);
   const { status } = session;
 
   useEffect(() => {
@@ -30,13 +31,14 @@ export default function () {
           setCity(data.city);
           setCountry(data.country);
           setIsAdmin(data.admin);
+          setProfileFetched(true);
         });
       });
     }
   }, [session, status]);
 
-  if (status === "loading") {
-    return "Loading...";
+  if (status === "loading" || !profileFetched) {
+    return <p className="flex justify-center items-center mt-8">Loading...</p>;
   }
 
   if (status === "unauthenticated") {
@@ -45,6 +47,7 @@ export default function () {
 
   const handleProfileInfoUpdate = async (e) => {
     e.preventDefault();
+    
     const savingPromise = new Promise(async (resolve, reject) => {
       const response = await fetch("/api/profile", {
         method: "PUT",
