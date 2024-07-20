@@ -5,6 +5,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import toast from "react-hot-toast";
 import UserTabs from "@/components/layout/UserTabs";
+import EditableImage from "@/components/layout/EditableImage";
 
 export default function () {
   const session = useSession();
@@ -47,7 +48,7 @@ export default function () {
 
   const handleProfileInfoUpdate = async (e) => {
     e.preventDefault();
-    
+
     const savingPromise = new Promise(async (resolve, reject) => {
       const response = await fetch("/api/profile", {
         method: "PUT",
@@ -76,73 +77,14 @@ export default function () {
     });
   };
 
-  const handleFileChange = async (e) => {
-    const files = e.target.files;
-    if (files?.length === 1) {
-      const data = new FormData();
-      data.set("file", files[0]);
-
-      const uploadPromise = fetch("/api/upload", {
-        method: "POST",
-        body: data,
-      })
-        .then((response) => {
-          if (response.ok) {
-            return response.json().then((link) => {
-              /* For S3 image Upload */
-              // setImage(link);
-
-              /* For cloudinary upload */
-              setImage(link.imgUrl);
-            });
-          }
-        })
-        .catch((error) => {
-          throw new Error(error);
-        });
-
-      await toast.promise(uploadPromise, {
-        loading: "Uploading...",
-        success: "Upload complete!",
-        error: "Upload failed!",
-      });
-    }
-  };
-
   return (
     <section className="mt-8">
       <UserTabs isAdmin={isAdmin} />
       <div className="max-w-md mx-auto mt-8">
         <div className="flex gap-4">
-          <div className="">
+          <div>
             <div className="p-2 rounded-lg relative max-w-[120px]">
-              {image && (
-                <Image
-                  className="rounded-lg w-full h-[86px] mb-1"
-                  src={image}
-                  width={256}
-                  height={266}
-                  alt="avatar"
-                />
-                /* For s3 Image */
-                // <img
-                //   className="rounded-lg w-full h-full mb-1"
-                //   src={image}
-                //   width={256}
-                //   height={256}
-                //   alt="avatar"
-                // />
-              )}
-              <label>
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                <span className="block border border-gray-300 rounded-lg p-2 text-center cursor-pointer">
-                  Edit
-                </span>
-              </label>
+              <EditableImage link={image} setLink={setImage} />
             </div>
           </div>
           <form className="grow" onSubmit={handleProfileInfoUpdate}>
