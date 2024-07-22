@@ -1,5 +1,10 @@
 import { model, models, Schema } from "mongoose";
 
+const ExtraPriceSchema = new Schema({
+  name: String,
+  price: Number,
+});
+
 const MenuItemSchema = new Schema(
   {
     image: {
@@ -13,6 +18,12 @@ const MenuItemSchema = new Schema(
     },
     basePrice: {
       type: Number,
+    },
+    sizes: {
+      type: [ExtraPriceSchema],
+    },
+    extraIngredientPrices: {
+      type: [ExtraPriceSchema],
     },
   },
   { timestamps: true }
