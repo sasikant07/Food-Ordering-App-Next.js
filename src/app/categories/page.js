@@ -1,4 +1,5 @@
 "use client";
+import DeleteButton from "@/components/DeleteButton";
 import UserTabs from "@/components/layout/UserTabs";
 import { useProfile } from "@/components/useProfile";
 import { useEffect, useState } from "react";
@@ -65,6 +66,28 @@ export default function CategoriesPage() {
     });
   };
 
+  const handleDeleteClick = async (_id) => {
+    const promise = new Promise(async (resolve, reject) => {
+      const response = await fetch("/api/categories?_id=" + _id, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        resolve();
+      } else {
+        reject();
+      }
+    });
+
+    await toast.promise(promise, {
+      loading: "Deleting...",
+      success: "Category deleted!",
+      error: "Error",
+    });
+
+    fetchCategories();
+  };
+
   return (
     <section className="mt-8 max-w-md mx-auto">
       <UserTabs isAdmin={true} />
@@ -85,27 +108,47 @@ export default function CategoriesPage() {
               onChange={(e) => setCategoryName(e.target.value)}
             />
           </div>
-          <div className="pb-2">
+          <div className="pb-2 flex gap-2">
             <button className="border border-primary" type="submit">
               {editedCategory ? "Update" : "Create"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditedCategory(null);
+                setCategoryName("");
+              }}
+            >
+              Cancel
             </button>
           </div>
         </div>
       </form>
       <div>
-        <h2 className="mt-8 text-sm text-gray-500">Edir category:</h2>
+        <h2 className="mt-8 text-sm text-gray-500">Existing categories:</h2>
         {categories?.length > 0 &&
           categories.map((c) => (
-            <button
+            <div
               key={c._id}
-              onClick={() => {
-                setEditedCategory(c);
-                setCategoryName(c.name);
-              }}
-              className="rounded-xl p-2 flex gap-1 cursor-pointer mb-1"
+              className="bg-gray-100 rounded-xl p-2 flex gap-1 mb-1 items-center"
             >
-              <span>{c.name}</span>
-            </button>
+              <div className="grow">{c.name}</div>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditedCategory(c);
+                    setCategoryName(c.name);
+                  }}
+                >
+                  Edit
+                </button>
+                <DeleteButton
+                  label="Delete"
+                  onDelete={() => handleDeleteClick(c._id)}
+                />
+              </div>
+            </div>
           ))}
       </div>
     </section>
