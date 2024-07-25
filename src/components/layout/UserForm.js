@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import EditableImage from "./EditableImage";
+import { useProfile } from "../useProfile";
 
 export default function UserForm({ user, onSave }) {
   const [userName, setUserName] = useState(user?.name || "");
@@ -10,6 +11,8 @@ export default function UserForm({ user, onSave }) {
   const [postalCode, setPostalCode] = useState(user?.postalCode || "");
   const [city, setCity] = useState(user?.city || "");
   const [country, setCountry] = useState(user?.country || "");
+  const [admin, setAdmin] = useState(user?.admin || false);
+  const { data: loggedInUserData } = useProfile();
 
   return (
     <div className="flex gap-4">
@@ -29,6 +32,7 @@ export default function UserForm({ user, onSave }) {
             postalCode,
             city,
             country,
+            admin
           })
         }
       >
@@ -60,8 +64,8 @@ export default function UserForm({ user, onSave }) {
           onChange={(e) => setStreetAddress(e.target.value)}
           placeholder="Street address"
         />
-        <div className="flex gap-2">
-          <div className="">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
             <label>Postal code</label>
             <input
               type="text"
@@ -87,6 +91,24 @@ export default function UserForm({ user, onSave }) {
           onChange={(e) => setCountry(e.target.value)}
           placeholder="Country"
         />
+        {loggedInUserData.admin && (
+          <div>
+            <label
+              className="p-2 inline-flex items-center gap-2 mb-2"
+              htmlFor="adminCb"
+            >
+              <input
+                id="adminCb"
+                type="checkbox"
+                className=""
+                value={"1"}
+                checked={admin}
+                onClick={(e) => setAdmin(e.target.checked)}
+              />
+              <span>Admin</span>
+            </label>
+          </div>
+        )}
         <button type="submit">Save</button>
       </form>
     </div>
