@@ -1,5 +1,7 @@
 "use client";
 
+import Sectionheaders from "@/components/layout/SectionHeaders";
+import MenuItem from "@/components/menu/MenuItem";
 import { useEffect, useState } from "react";
 
 export default function MenuPage() {
@@ -13,10 +15,29 @@ export default function MenuPage() {
     });
 
     fetch("/api/menu-items").then((res) => {
-      res.json((menuItems) => {
+      res.json().then((menuItems) => {
         setMenuItems(menuItems);
       });
     });
   }, []);
-  return <section>menu items here with categories</section>;
+
+  return (
+    <section className="mt-8">
+      {categories?.length > 0 &&
+        categories.map((c) => (
+          <div key={c._id}>
+            <div className="text-center">
+              <Sectionheaders mainHeader={c.name} />
+            </div>
+            <div className="grid grid-cols-3 gap-4 mt-6 mb-12">
+              {menuItems
+                .filter((item) => item.category === c._id)
+                .map((item) => (
+                  <MenuItem {...item} />
+                ))}
+            </div>
+          </div>
+        ))}
+    </section>
+  );
 }
