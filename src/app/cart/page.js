@@ -26,13 +26,26 @@ export default function CartPage() {
     }
   }, [profileData]);
 
-  let total = 0;
+  let subTotal = 0;
   for (const p of cartProducts) {
-    total += cartProductPrice(p);
+    subTotal += cartProductPrice(p);
   }
 
   const handleAddressChange = (propName, value) => {
     setAddress((prevAddress) => ({ ...prevAddress, [propName]: value }));
+  };
+
+  const proceedToCheckout = async (e) => {
+    e.preventDefault();
+    const response = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address,
+        cartProducts,
+      }),
+    });
+    window.location = await response.json();
   };
 
   return (
@@ -90,19 +103,30 @@ export default function CartPage() {
                 </div>
               </div>
             ))}
-          <div className="py-2 text-right pr-14">
-            <span className="text-gray-500">Subtotal:</span>
-            <span className="text-lg font-semibold pl-2">${total}</span>
+          <div className="py-2 pr-14 flex justify-end items-center">
+            <div className="text-gray-500">
+              Subtotal:
+              <br />
+              Delivery:
+              <br />
+              Total:
+            </div>
+            <div className="font-semibold pl-2 text-right">
+              ${subTotal}
+              <br />
+              $5
+              <br />${subTotal + 5}
+            </div>
           </div>
         </div>
         <div className="bg-gray-100 p-4 rounded-lg h-[400px]">
           <h2 className="text-center text-lg font-semibold">Checkout</h2>
-          <form>
+          <form onSubmit={proceedToCheckout}>
             <AddressInputs
               addressProps={address}
               setAddressProps={handleAddressChange}
             />
-            <button type="submit">Pay ${total}</button>
+            <button type="submit">Pay ${subTotal + 5}</button>
           </form>
         </div>
       </div>
