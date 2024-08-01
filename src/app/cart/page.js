@@ -6,6 +6,7 @@ import Sectionheaders from "@/components/layout/SectionHeaders";
 import { useProfile } from "@/components/useProfile";
 import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function CartPage() {
   const { cartProducts, removeCartProduct } = useContext(CartContext);
@@ -37,15 +38,30 @@ export default function CartPage() {
 
   const proceedToCheckout = async (e) => {
     e.preventDefault();
-    const response = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        address,
-        cartProducts,
-      }),
+
+    const promise = new Promise((resolve, reject) => {
+      fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address,
+          cartProducts,
+        }),
+      }).then(async (response) => {
+        if (response.ok) {
+          resolve();
+          window.location = await response.json();
+        } else {
+          reject();
+        }
+      });
     });
-    window.location = await response.json();
+
+    await toast.promise(promise, {
+      loading: "Preparing your payment",
+      success: "Redirecting to payment",
+      error: "Something went wrong...Please try again later",
+    });
   };
 
   return (

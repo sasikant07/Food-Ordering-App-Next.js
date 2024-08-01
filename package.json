@@ -13,6 +13,7 @@
     "@aws-sdk/client-s3": "^3.614.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.0.0",
+    "micro": "^10.0.1",
     "mongodb": "^6.8.0",
     "mongoose": "^8.5.1",
     "next": "14.2.5",
