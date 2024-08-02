@@ -1,3 +1,5 @@
+import { Order } from "@/models/Order";
+
 const stripe = require("stripe")(process.env.STRIPE_SK);
 
 export async function POST(req) {
@@ -11,6 +13,15 @@ export async function POST(req) {
   } catch (error) {
     console.log("stripe error");
     return Response.json(error, { status: 400 });
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const orderId = event?.data?.object?.metadata?.orderId;
+    const isPaid = event?.data?.object?.payment_status === "paid";
+
+    if (isPaid) {
+      await Order.updateOne({ _id: orderId }, {paid: true});
+    }
   }
 
   return Response.json("OK", { status: 200 });
