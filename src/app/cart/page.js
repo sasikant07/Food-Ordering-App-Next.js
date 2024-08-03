@@ -16,7 +16,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      if (window.location.href.url.includes("canceled=1")) {
+      if (window.location.href.includes("canceled=1")) {
         toast.error("Payment failed");
       }
     }
@@ -98,6 +98,7 @@ export default function CartPage() {
                 product={product}
                 onRemove={removeCartProduct}
                 cartProductPrice={cartProductPrice}
+                index={index}
               />
             ))}
           <div className="py-2 pr-14 flex justify-end items-center">
