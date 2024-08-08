@@ -6,8 +6,8 @@ export default function Hero() {
     <section className="hero mt-4">
       <div className="py-12">
         <h1 className="text-4xl font-semibold">
-          Everything <br /> 
-          is better <br /> 
+          Everything <br />
+          is better <br />
           with a&nbsp;
           <span className="text-primary">Pizza</span>
         </h1>
@@ -26,7 +26,7 @@ export default function Hero() {
           </button>
         </div>
       </div>
-      <div className="relative">
+      <div className="relative hidden md:block">
         <Image
           src={"/pizza.png"}
           alt="pizza"
