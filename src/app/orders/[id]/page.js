@@ -52,6 +52,7 @@ export default function OrderPage() {
           <div>
             {order.cartProducts.map((product) => (
               <CartProduct
+              key={product._id}
                 product={product}
                 cartProductPrice={cartProductPrice}
               />

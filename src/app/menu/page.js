@@ -33,7 +33,7 @@ export default function MenuPage() {
               {menuItems
                 .filter((item) => item.category === c._id)
                 .map((item) => (
-                  <MenuItem {...item} />
+                  <MenuItem key={item._id} {...item} />
                 ))}
             </div>
           </div>
